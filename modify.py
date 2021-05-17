@@ -1,10 +1,13 @@
 # modify the globals
 
 import config
+
 import os, sys
 from pathlib import Path
 
-config.CURRENT_DIR_STR = os.path.abspath('')
+data_file_name = 'owid-covid-data.json'
+
+config.CURRENT_DIR_STR = os.path.dirname(__file__)
 config.DATA_FILE_STR = os.path.join(config.CURRENT_DIR_STR, 'data', data_file_name)
 config.ARGO_PACKAGE_STR = os.path.join(config.CURRENT_DIR_STR, 'colchis')
 config.DATA_FILE_PATH = Path(config.DATA_FILE_STR)

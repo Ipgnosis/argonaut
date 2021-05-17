@@ -1,9 +1,10 @@
 # app.py for argonaut
 
-import json
-import os
-import requests
 import config, modify
 
+from colchis.classes.argo import Argo
 
-print("Hello World!")
+file_obj = Argo(config.DATA_FILE_PATH)
+
+print(file_obj.filePath)
+print(file_obj.jFile)
