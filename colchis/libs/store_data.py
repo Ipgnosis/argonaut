@@ -8,53 +8,54 @@ import config, modify
 
 # read a json data file
 def read_json_data(fname):
+    """ Takes a file path and returns a file or an error """
 
     try:
-        with open(fname) as json_file:
-            data = json.load(json_file)
-        return data
+        with open(fname, "r", encoding="utf-8") as json_file:
+            return json.load(json_file)
+        # The file is automatically closed when the 'with' block ends
     except OSError as error:
         print(error)
-        print("File {} cannot be read".format(fname))
+        print(f"File {fname} cannot be read")
         return False
 
 
 # write a json data file
-def write_json_data(fname, wdata):
+def write_json_data(fname, wdata, mode):
+    """ Takes a file path, data, write mode and writes data to the file """
 
     try:
-        with open(fname, 'w') as outfile:
-            json.dump(wdata, outfile)
+        with open(fname, mode, encoding="utf-8") as outfile:
+            json.dump(wdata, outfile, indent=4, ensure_ascii=False)
+        # The file is automatically closed when the 'with' block ends
         return True
     except OSError as error:
         print(error)
-        print("File {} cannot be saved".format(fname))
-        return False
+        print(f"File {fname} cannot be saved")
 
 
-# delete a file
+# delete a file given a path
 def delete_file(fname):
+    """ Delete the param file path """
 
     try:
         os.remove(fname)
         return True
     except OSError as error:
-        print(error)
-        print("File {} cannot be removed".format(fname))
+        print(f"{error}: file {fname} cannot be removed.")
         return False
 
 
-# rename a file
+# rename a file given 2 paths
 def rename_file(fromf, tof):
+    """ Rename a file in a path """
 
     try:
         os.rename(fromf, tof)
         return True
     except OSError as error:
-        print(error)
-        print("File {} cannot be removed".format(fromf))
+        print(f"File {fromf} cannot be renamed: {error}")
         return False
-
 
 
 # test function
@@ -69,7 +70,6 @@ def main():
     sys.path.append(proj_loc)
 
     import config, modify
-
 
 
 # stand alone test run
