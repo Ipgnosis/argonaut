@@ -1,47 +1,78 @@
-# the class definition for argonaut
+''' class definition for argonaut
+    takes one param on instantiation:
+        fpath: the path to the json file being processed
+'''
 
+# import os
 import json
-#import os
+from pathlib import Path
+# import config
 
+
+# the class definition for argonaut
 class Argo:
+    """ a class to facilitate json object operations """
 
-    def __init__(self, fPath):
+    def __init__(self, json_path):
 
-        self.filePath = fPath
+        self.file_path = json_path
 
-        if self.filePath.exists():
-            self.jFile = self.read_json_data(self.filePath)
+        self.json_obj = self.__read_json_data(self.file_path)
 
+    # write a json data file
+    def write_json_data(self, file_path, wdata, mode):
+        """Takes a file path, data, write mode and writes data to the file"""
 
-    # read a json data file
-    def read_json_data(self, fname):
+        these_parms = [
+            (file_path, Path),
+            (wdata, dict),
+            (mode, str)
+        ]
+
+        good_param_check = self.__good_params(these_parms)
+        if not good_param_check:
+            return good_param_check
 
         try:
-            with open(fname) as json_file:
-                data = json.load(json_file)
-            return data
+            with open(file_path, mode, encoding="utf-8") as outfile:
+                json.dump(wdata, outfile, indent=4, ensure_ascii=False)
+            # The file is automatically closed when the 'with' block ends
+            return True
         except OSError as error:
             print(error)
-            print("File {} cannot be read".format(fname))
+            print(f"File {file_path} cannot be saved")
             return False
 
+    # #################### private methods ############################
 
-# test function
+    # PRIVATE - read a json data file
+    def __read_json_data(self, file_path):
+        """ Takes a file path and returns a file or an error """
 
-def main():
+        these_parms = [
+            (file_path, Path)
+        ]
 
-    #import os
-    import sys
+        good_param_check = self.__good_params(these_parms)
+        if not good_param_check:
+            return good_param_check
 
-    proj_loc = "c:\\Users\\Ipgnosis\\Documents\\Github\\argonaut"
+        try:
+            with open(file_path, "r", encoding="utf-8") as json_file:
+                return json.load(json_file)
+            # The file is automatically closed when the 'with' block ends
+        except OSError as error:
+            print(error)
+            print(f"File {file_path} cannot be read")
+            return False
 
-    sys.path.append(proj_loc)
+    # PRIVATE - checks params for all other functions
+    def __good_params(self, params):
+        """ takes a list of tuples and returns True or raises a TypeError """
 
-    import config, modify
+        for param in params:
 
+            if not isinstance(param[0], param[1]):
+                raise TypeError(f"Parameter {param[0]} is not of type {param[1]}")
 
-
-# stand alone test run
-# don't forget to flip the import statements
-if __name__ == "__main__":
-    main()
+        return True
