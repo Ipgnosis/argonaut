@@ -20,3 +20,4 @@ sys.path.append(DATA_DIR)
 
 # conda env paths
 CONDA_PATH = r"C:\Users\russe\anaconda3\envs\bb-env"
+sys.path.append(CONDA_PATH)
