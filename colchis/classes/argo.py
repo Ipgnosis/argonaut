@@ -1,6 +1,6 @@
 ''' class definition for argonaut
     takes one param on instantiation:
-        fpath: the path to the json file being processed
+        json_path: the path to the json file being processed
 '''
 
 # import os
@@ -23,15 +23,15 @@ class Argo:
     def write_json_data(self, file_path, wdata, mode):
         """Takes a file path, data, write mode and writes data to the file"""
 
-        these_parms = [
+        these_params = [
             (file_path, Path),
             (wdata, (list, dict)),
             (mode, str)
         ]
 
-        good_param_check = self.__good_params(these_parms)
-        if not good_param_check:
-            return good_param_check
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
 
         try:
             with open(file_path, mode, encoding="utf-8") as outfile:
@@ -79,19 +79,75 @@ class Argo:
         if sub_obj and sub_obj.values() != -1:
             self.depict_struct(list(this_obj.values())[0])
 
-    # #################### private methods ############################
+    def create_key_list(self):
+        """ create a list of keys """
+        pass
+
+    def create_value_list(self):
+        """ create a list of valid values """
+        pass
+
+    def add_key_value(self):
+        """ add a key value pair """
+        pass
+
+    def delete_key_value(self):
+        """ delete a key:value pair """
+        pass
+
+    def update_key(self):
+        """ update a key without changing the structure or the value """
+        pass
+
+    def update_value(self):
+        """ update a value without changing the structure or the key """
+        pass
+
+    def find_key(self):
+        """ find a key """
+        pass
+
+    def find_value(self):
+        """ find or get all values """
+        pass
+
+    def find_except(self):
+        """ find values except those in a list of values """
+        pass
+
+    def find_element(self):
+        """ find an element in a list, return the index """
+        pass
+
+    def delete_element(self):
+        """ delete an element from the list """
+        pass
+
+    def update_element(self):
+        """ update an element in the same location in the list """
+        pass
+
+    def append_element(self):
+        """ append an element to the end of a list """
+        pass
+
+    def insert_element(self):
+        """ insert an element into a list in order """
+        pass
+
+# #################### private methods ############################
 
     # PRIVATE - read a json data file
     def __read_json_data(self, file_path):
         """ Takes a file path and returns a file or an error """
 
-        these_parms = [
+        these_params = [
             (file_path, Path)
         ]
 
-        good_param_check = self.__good_params(these_parms)
-        if not good_param_check:
-            return good_param_check
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
 
         try:
             with open(file_path, "r", encoding="utf-8") as json_file:
