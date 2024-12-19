@@ -25,7 +25,7 @@ class Argo:
 
         these_parms = [
             (file_path, Path),
-            (wdata, dict),
+            (wdata, (list, dict)),
             (mode, str)
         ]
 
@@ -42,6 +42,28 @@ class Argo:
             print(error)
             print(f"File {file_path} cannot be saved")
             return False
+
+    def depict_json(self):
+        """ developer feature to show the object structure """
+
+        print(json.dumps(self.json_obj, indent=4))
+
+    def depict_struct(self, sub_obj=None):
+        """ developer feature to show the object structure """
+
+        if not sub_obj:
+            this_obj = self.json_obj
+        else:
+            this_obj = sub_obj
+
+        print(type(this_obj))
+        print("{----+")
+        print("     |")
+        print("     |")
+        print(f"     {this_obj.keys()[0]}")
+
+        if sub_obj and sub_obj.values() != -1:
+            self.depict_struct(list(this_obj.values())[0])
 
     # #################### private methods ############################
 
@@ -71,8 +93,8 @@ class Argo:
         """ takes a list of tuples and returns True or raises a TypeError """
 
         for param in params:
-
-            if not isinstance(param[0], param[1]):
-                raise TypeError(f"Parameter {param[0]} is not of type {param[1]}")
+            allowed_types = param[1]
+            if not isinstance(param[0], allowed_types):
+                raise TypeError(f"Parameter {param[0]} is not of type {allowed_types}")
 
         return True
