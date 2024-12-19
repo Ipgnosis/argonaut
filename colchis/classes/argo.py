@@ -38,9 +38,23 @@ class Argo:
                 json.dump(wdata, outfile, indent=4, ensure_ascii=False)
             # The file is automatically closed when the 'with' block ends
             return True
+        except json.decoder.JSONDecodeError:
+            print(f"File {file_path} is not valid JSON")
+            return False
         except OSError as error:
-            print(error)
-            print(f"File {file_path} cannot be saved")
+            print(f"{error}: file {file_path} cannot be saved")
+            return False
+
+    # validate a json object
+    def validate_json_data(self, json_data):
+        """checks the validity of a json object"""
+
+        try:
+            if json.dumps(json_data):
+                return True
+            return False
+        except json.decoder.JSONDecodeError as e:
+            print("Invalid JSON syntax:", e)
             return False
 
     def depict_json(self):
@@ -83,9 +97,11 @@ class Argo:
             with open(file_path, "r", encoding="utf-8") as json_file:
                 return json.load(json_file)
             # The file is automatically closed when the 'with' block ends
+        except json.decoder.JSONDecodeError:
+            print(f"File {file_path} is not valid JSON")
+            return False
         except OSError as error:
-            print(error)
-            print(f"File {file_path} cannot be read")
+            print(f"{error}: File {file_path} cannot be read")
             return False
 
     # PRIVATE - checks params for all other functions
