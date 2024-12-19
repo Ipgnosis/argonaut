@@ -38,8 +38,8 @@ class Argo:
                 json.dump(wdata, outfile, indent=4, ensure_ascii=False)
             # The file is automatically closed when the 'with' block ends
             return True
-        except json.decoder.JSONDecodeError:
-            print(f"File {file_path} is not valid JSON")
+        except json.decoder.JSONDecodeError as e:
+            print(f"{e}: file {file_path} is not valid JSON")
             return False
         except OSError as error:
             print(f"{error}: file {file_path} cannot be saved")
@@ -54,7 +54,7 @@ class Argo:
                 return True
             return False
         except json.decoder.JSONDecodeError as e:
-            print("Invalid JSON syntax:", e)
+            print(f"Invalid JSON syntax: {e}")
             return False
 
     def depict_json(self):
@@ -81,59 +81,45 @@ class Argo:
 
     def create_key_list(self):
         """ create a list of keys """
-        pass
 
     def create_value_list(self):
         """ create a list of valid values """
-        pass
 
     def add_key_value(self):
         """ add a key value pair """
-        pass
 
     def delete_key_value(self):
         """ delete a key:value pair """
-        pass
 
     def update_key(self):
         """ update a key without changing the structure or the value """
-        pass
 
     def update_value(self):
         """ update a value without changing the structure or the key """
-        pass
 
     def find_key(self):
         """ find a key """
-        pass
 
     def find_value(self):
         """ find or get all values """
-        pass
 
     def find_except(self):
         """ find values except those in a list of values """
-        pass
 
     def find_element(self):
         """ find an element in a list, return the index """
-        pass
 
     def delete_element(self):
         """ delete an element from the list """
-        pass
 
     def update_element(self):
         """ update an element in the same location in the list """
-        pass
 
     def append_element(self):
         """ append an element to the end of a list """
-        pass
 
     def insert_element(self):
         """ insert an element into a list in order """
-        pass
 
 # #################### private methods ############################
 
@@ -153,8 +139,8 @@ class Argo:
             with open(file_path, "r", encoding="utf-8") as json_file:
                 return json.load(json_file)
             # The file is automatically closed when the 'with' block ends
-        except json.decoder.JSONDecodeError:
-            print(f"File {file_path} is not valid JSON")
+        except json.decoder.JSONDecodeError as e:
+            print(f"{e}: file {file_path} is not valid JSON")
             return False
         except OSError as error:
             print(f"{error}: File {file_path} cannot be read")
