@@ -1,3 +1,6 @@
+# exclude the contents of /data and other sensitive stuff
+/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

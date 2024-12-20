@@ -1,22 +1,26 @@
-''' class definition for Argo
+""" class definition for Argo
     takes one param on instantiation:
         json_path: the path to the json file being processed
 
     where possible, type checking is performed on parameters
-'''
+    
+    there are also some methods that are public that will work on separate (non-instantiated)
+    json structures: this is intentional to aid development
+"""
 
-# import os
 import json
 from pathlib import Path
-# import config
 
 
 # the class definition for argonaut
+# see the README
 class Argo:
     """ a class to facilitate json object operations """
 
+    # instantiate
     def __init__(self, json_path):
 
+        # type checking on params
         these_params = [
             (json_path, Path)
         ]
@@ -25,6 +29,7 @@ class Argo:
         if param_check:
             print(f"Instantiating '{json_path}' as an Argo object.")
 
+        # create global objects
         self.file_path = json_path
 
         self.json_obj = self.__read_json_data(self.file_path)
@@ -33,6 +38,7 @@ class Argo:
     def write_json_data(self, file_path, wdata, mode):
         """Takes a file path, data, write mode and writes data to the file"""
 
+        # type checking on params
         these_params = [
             (file_path, Path),
             (wdata, (list, dict)),
@@ -55,53 +61,105 @@ class Argo:
             print(f"{error}: file {file_path} cannot be saved")
             return False
 
-    # validate a json object
-    def validate_json_data(self, json_data):
-        """checks the validity of a json object"""
+    # validate an external json object
+    def validate_json_data(self, j_obj):
+        """ developer productivity feature: check the validity of a json object """
 
+        # type checking on params
+        these_params = [(j_obj, (list, dict))]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        # validate
         try:
-            if json.dumps(json_data):
+            if json.dumps(j_obj):
+                print("Valid JSON syntax.")
                 return True
             return False
         except json.decoder.JSONDecodeError as e:
             print(f"Invalid JSON syntax: {e}")
             return False
 
-    def depict_json(self, d=None):
+    # print out the file to the terminal with indentation
+    def print_json(self, j_obj=None):
         """ developer feature to show the object contents """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
-        if not d:
+        if not j_obj:
             this_obj = self.json_obj
             print(f"Object output for {self.file_path}")
         else:
-            this_obj = d
+            # type checking on params
+            these_params = [(j_obj, (list, dict))]
 
+            param_check = self.__good_params(these_params)
+            if not param_check:
+                return param_check
+
+            this_obj = j_obj
+
+        # output the j_obj
         print(json.dumps(this_obj, indent=4))
 
-    def depict_struct(self, d=None, level=0):
-        """ developer feature to show the object structure """
+        return True
+
+    # print out a json structure to the terminal with types and indentation
+    def depict_struct(self, j_obj=None, lines=10, level=0, line_count=0):
+        """ developer productivity feature to show a json object structure """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
-        if not d:
+        if not j_obj:
             this_obj = self.json_obj
             print(f"Structure diagram for {self.file_path}")
         else:
-            this_obj = d
+            # type checking on params
+            these_params = [
+                (j_obj, (list, dict)),
+                (lines, int),
+                (level, int),
+                (line_count, int),
+            ]
+
+            param_check = self.__good_params(these_params)
+            if not param_check:
+                return param_check
+
+            this_obj = j_obj
 
         # calculate the indentation
         spaces = "     " * level
 
-        for key, value in this_obj.items():
-            if isinstance(key, str) and isinstance(value, dict):
-                print(f"{spaces}key = {type(key)}: value = {type(value)}")
+        # run the output
+        if isinstance(this_obj, dict):
+            for key, value in this_obj.items():
+                if isinstance(value, dict):
+                    print(f"{spaces}key = {type(key)}: value = {type(value)}")
+                    # manage the scrolling
+                    line_count = self.__line_counter(line_count, lines)
+                    self.depict_struct(value, lines, level + 1, line_count)
+                else:
+                    print(f"{spaces}key = {type(key)}: value = {type(value)}")
 
-            if isinstance(value, dict):
-                self.depict_struct(value, level + 1)
-            else:
-                print(f"{spaces}key = {type(key)}: value = {type(value)}")
+        elif isinstance(this_obj, list):
+            for index, item in enumerate(this_obj):
+                if isinstance(item, (dict, list)):
+                    print(f"{spaces}index = {index}: value = {type(item)}")
+                    # manage the scrolling
+                    line_count = self.__line_counter(line_count, lines)
+                    self.depict_struct(item, lines, level + 1, line_count)
+                else:
+                    print(f"{spaces}index = {index}: value = {type(item)}")
+
+        else:  # Handle other data types like strings, numbers, etc.
+            print(f"{spaces}value = {type(this_obj)}: {this_obj}")
+            # manage the scrolling
+            line_count = self.__line_counter(line_count, lines)
+
+        return True
 
     def create_key_list(self):
         """ create a list of keys """
@@ -148,6 +206,9 @@ class Argo:
     # #################### private methods ############################
 
     # PRIVATE - read a json data file
+    # called only by __init__ (maybe others later??)
+    # there's a case to be made that this method should be public, so that any json file can be read
+    # but the purpose of argonaut is to improve productivity on json wrangling
     def __read_json_data(self, file_path):
         """ Takes a file path and returns a file or an error """
 
@@ -170,7 +231,7 @@ class Argo:
             print(f"{error}: File {file_path} cannot be read")
             return False
 
-    # PRIVATE - checks params for all other functions
+    # PRIVATE - type checking on params for all other functions
     def __good_params(self, params):
         """ takes a list of tuples and returns True or raises a TypeError """
 
@@ -180,3 +241,23 @@ class Argo:
                 raise TypeError(f"The parameter value '{param[0]}' is not of type {allowed_types}")
 
         return True
+
+    # PRIVATE - manage the line count for depict_struct
+    # this doesn't work perfectly: the recursion breaks the line count
+    # but it works well enough for now
+    def __line_counter(self, line_count, lines):
+        """ manage the line-count and implement pause as required """
+
+        # increment line count since we have just printed a line
+        line_count += 1
+
+        # have we breached the line limit?
+        if line_count > lines:
+
+            while True:
+                input("Press 'Enter' to continue, or 'CTRL-C' to stop...")
+                break
+
+            line_count = 0
+
+        return line_count
