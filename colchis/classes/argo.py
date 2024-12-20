@@ -1,6 +1,8 @@
-''' class definition for argonaut
+''' class definition for Argo
     takes one param on instantiation:
         json_path: the path to the json file being processed
+
+    where possible, type checking is performed on parameters
 '''
 
 # import os
@@ -14,6 +16,14 @@ class Argo:
     """ a class to facilitate json object operations """
 
     def __init__(self, json_path):
+
+        these_params = [
+            (json_path, Path)
+        ]
+
+        param_check = self.__good_params(these_params)
+        if param_check:
+            print(f"Instantiating '{json_path}' as an Argo object.")
 
         self.file_path = json_path
 
@@ -57,27 +67,41 @@ class Argo:
             print(f"Invalid JSON syntax: {e}")
             return False
 
-    def depict_json(self):
-        """ developer feature to show the object structure """
+    def depict_json(self, d=None):
+        """ developer feature to show the object contents """
 
-        print(json.dumps(self.json_obj, indent=4))
-
-    def depict_struct(self, sub_obj=None):
-        """ developer feature to show the object structure """
-
-        if not sub_obj:
+        # this gives the option of sending a random dict
+        # no param means use the instantiated object
+        if not d:
             this_obj = self.json_obj
+            print(f"Object output for {self.file_path}")
         else:
-            this_obj = sub_obj
+            this_obj = d
 
-        print(type(this_obj))
-        print("{----+")
-        print("     |")
-        print("     |")
-        print(f"     {this_obj.keys()[0]}")
+        print(json.dumps(this_obj, indent=4))
 
-        if sub_obj and sub_obj.values() != -1:
-            self.depict_struct(list(this_obj.values())[0])
+    def depict_struct(self, d=None, level=0):
+        """ developer feature to show the object structure """
+
+        # this gives the option of sending a random dict
+        # no param means use the instantiated object
+        if not d:
+            this_obj = self.json_obj
+            print(f"Structure diagram for {self.file_path}")
+        else:
+            this_obj = d
+
+        # calculate the indentation
+        spaces = "     " * level
+
+        for key, value in this_obj.items():
+            if isinstance(key, str) and isinstance(value, dict):
+                print(f"{spaces}key = {type(key)}: value = {type(value)}")
+
+            if isinstance(value, dict):
+                self.depict_struct(value, level + 1)
+            else:
+                print(f"{spaces}key = {type(key)}: value = {type(value)}")
 
     def create_key_list(self):
         """ create a list of keys """
@@ -121,7 +145,7 @@ class Argo:
     def insert_element(self):
         """ insert an element into a list in order """
 
-# #################### private methods ############################
+    # #################### private methods ############################
 
     # PRIVATE - read a json data file
     def __read_json_data(self, file_path):
@@ -153,6 +177,6 @@ class Argo:
         for param in params:
             allowed_types = param[1]
             if not isinstance(param[0], allowed_types):
-                raise TypeError(f"Parameter {param[0]} is not of type {allowed_types}")
+                raise TypeError(f"The parameter value '{param[0]}' is not of type {allowed_types}")
 
         return True
