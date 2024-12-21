@@ -11,8 +11,8 @@ ARGO_DIR = os.path.abspath(PROJECT_ROOT)
 sys.path.append(ARGO_DIR)
 
 # project paths
-ARGO_PACKAGE_DIR = os.path.join(ARGO_DIR, 'colchis')
-sys.path.append(ARGO_PACKAGE_DIR)
+ARGO_PACKAGE = os.path.join(ARGO_DIR, 'colchis')
+sys.path.append(ARGO_PACKAGE)
 
 # data folders paths
 DATA_DIR = os.path.join(ARGO_DIR, "data")

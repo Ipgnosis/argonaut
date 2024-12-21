@@ -3,7 +3,7 @@
         json_path: the path to the json file being processed
 
     where possible, type checking is performed on parameters
-    
+
     there are also some methods that are public that will work on separate (non-instantiated)
     json structures: this is intentional to aid development
 """
@@ -33,6 +33,10 @@ class Argo:
         self.file_path = json_path
 
         self.json_obj = self.__read_json_data(self.file_path)
+
+        self.obj_struct = type(self.json_obj)
+
+        self.line_count = 0
 
     # write a json data file
     def write_json_data(self, file_path, wdata, mode):
@@ -107,8 +111,9 @@ class Argo:
         return True
 
     # print out a json structure to the terminal with types and indentation
-    def depict_struct(self, j_obj=None, lines=10, level=0, line_count=0):
-        """ developer productivity feature to show a json object structure """
+    # def depict_struct(self, j_obj=None, lines=10, level=0, line_count=0):
+    def depict_struct(self, j_obj=None, lines=10, level=0):
+        """developer productivity feature to show a json object structure"""
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
@@ -120,8 +125,8 @@ class Argo:
             these_params = [
                 (j_obj, (list, dict)),
                 (lines, int),
-                (level, int),
-                (line_count, int),
+                (level, int)
+                # (line_count, int),
             ]
 
             param_check = self.__good_params(these_params)
@@ -139,8 +144,11 @@ class Argo:
                 if isinstance(value, dict):
                     print(f"{spaces}key = {type(key)}: value = {type(value)}")
                     # manage the scrolling
-                    line_count = self.__line_counter(line_count, lines)
-                    self.depict_struct(value, lines, level + 1, line_count)
+                    # line_count = self.__line_counter(line_count, lines)
+                    # self.depict_struct(value, lines, level + 1, line_count)
+                    self.__line_counter(lines)
+                    self.depict_struct(value, lines, level + 1)
+
                 else:
                     print(f"{spaces}key = {type(key)}: value = {type(value)}")
 
@@ -149,15 +157,18 @@ class Argo:
                 if isinstance(item, (dict, list)):
                     print(f"{spaces}index = {index}: value = {type(item)}")
                     # manage the scrolling
-                    line_count = self.__line_counter(line_count, lines)
-                    self.depict_struct(item, lines, level + 1, line_count)
+                    # line_count = self.__line_counter(line_count, lines)
+                    # self.depict_struct(item, lines, level + 1, line_count)
+                    self.__line_counter(lines)
+                    self.depict_struct(item, lines, level + 1)
                 else:
                     print(f"{spaces}index = {index}: value = {type(item)}")
 
         else:  # Handle other data types like strings, numbers, etc.
             print(f"{spaces}value = {type(this_obj)}: {this_obj}")
             # manage the scrolling
-            line_count = self.__line_counter(line_count, lines)
+            # line_count = self.__line_counter(line_count, lines)
+            self.__line_counter(lines)
 
         return True
 
@@ -182,14 +193,34 @@ class Argo:
     def find_key(self):
         """ find a key """
 
-    def find_value(self):
+    def get_value(self, this_key):
         """ find or get all values """
 
     def find_except(self):
         """ find values except those in a list of values """
 
-    def find_element(self):
-        """ find an element in a list, return the index """
+    def find_element(self, key, key_val, val_key):
+        """ find an element in a list, return the value and index """
+
+        print(f"find_element: isinstance {self.obj_struct}")
+        if not self.obj_struct == list:
+            raise TypeError("find_element: this object is not a list.")
+
+        these_params = [
+            (key, str),
+            (key_val, str),
+            (val_key, (str, int, float, bool))
+        ]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        for elem, index in enumerate(self.json_obj):
+            if (elem[key] in elem) and (elem[key] == key_val):
+                return elem[val_key], index
+
+        return False
 
     def delete_element(self):
         """ delete an element from the list """
@@ -245,19 +276,20 @@ class Argo:
     # PRIVATE - manage the line count for depict_struct
     # this doesn't work perfectly: the recursion breaks the line count
     # but it works well enough for now
-    def __line_counter(self, line_count, lines):
+    # def __line_counter(self, line_count, lines):
+    def __line_counter(self, lines):
         """ manage the line-count and implement pause as required """
 
         # increment line count since we have just printed a line
-        line_count += 1
+        self.line_count += 1
 
         # have we breached the line limit?
-        if line_count > lines:
+        if self.line_count > lines:
 
             while True:
                 input("Press 'Enter' to continue, or 'CTRL-C' to stop...")
                 break
 
-            line_count = 0
+            self.line_count = 0
 
-        return line_count
+        # return line_count
