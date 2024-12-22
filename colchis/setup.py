@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="colchis_BeanBazaarTest",
+    name="colchis",
     version="0.1.0",
     packages=find_packages(),
     author="Russell Bennett",
-    author_email="rpbsjy@gmail.com",
+    author_email="russell@beanbazaar.com",
     description="A package, implemented as a Class, to generalize JSON traversal and processing.",
     long_description=open("../README.md", encoding="UTF-8").read(),
     long_description_content_type="text/markdown",
