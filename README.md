@@ -1,4 +1,4 @@
-# Argonaut
+# Colchis
 
 A work in progress...
 
@@ -77,4 +77,4 @@ append_element
 insert_element
 
 ## Background
-**Jason** was a character in Greek mythology.  He set off on a quest in a ship (the **Argo**), with a crew (the **Argonauts**) to a foreign land (**Colchis**, present day Georgia) to recover a legendary **Golden Fleece** in order to regain his rightful throne.  To gain the Golden Fleece, he was assigned arduous tasks, which he *completed* though divine intervention.  Despite his triumph, Jason continued to encounter serious problems in life and ultimately died a poor man while asleep under the rotting Argo, which fell and killed him.
+**Jason** was a character in Greek mythology.  He set off on a quest in a ship (the **Argo**), with a crew (the **Argonauts**) to a foreign land (**Colchis**, present day Georgia) to recover a legendary **Golden Fleece** in order to regain his rightful throne.  To gain the Golden Fleece, he was assigned arduous tasks, which he *completed* though divine intervention.  Despite his triumph, Jason continued to encounter serious problems in life and ultimately died a poor man while asleep under the rotting Argo, which fell and killed him.  History hopefully doesn't repeat itself.
