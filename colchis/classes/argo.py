@@ -172,8 +172,17 @@ class Argo:
 
         return True
 
-    def create_key_list(self):
+    # atomic function
+    def create_key_list(self, this_dict):
         """ create a list of keys """
+
+        these_params = [(this_dict, dict)]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        return list(this_dict)
 
     def create_value_list(self):
         """ create a list of valid values """
@@ -193,34 +202,37 @@ class Argo:
     def find_key(self):
         """ find a key """
 
-    def get_value(self, this_key):
-        """ find or get all values """
-
-    def find_except(self):
-        """ find values except those in a list of values """
-
-    def find_element(self, key, key_val, val_key):
-        """ find an element in a list, return the value and index """
-
-        print(f"find_element: isinstance {self.obj_struct}")
-        if not self.obj_struct == list:
-            raise TypeError("find_element: this object is not a list.")
+    # atomic function
+    def get_value(self, this_dict, this_key):
+        """ get value from a dict given a key """
 
         these_params = [
-            (key, str),
-            (key_val, str),
-            (val_key, (str, int, float, bool))
+            (this_dict, dict),
+            (this_key, (str))
         ]
 
         param_check = self.__good_params(these_params)
         if not param_check:
             return param_check
 
-        for elem, index in enumerate(self.json_obj):
-            if (elem[key] in elem) and (elem[key] == key_val):
-                return elem[val_key], index
+        return this_dict.get(this_key, f"get_value: key {this_key} not found.")
 
-        return False
+    def find_except(self, this_list, exceptions_list):
+        """ find values except those in a list of values """
+
+    def find_element_index(self, this_list, val):
+        """ find an element in a list, return the index """
+
+        these_params = [
+            (this_list, list),
+            (val, (str, int, float, bool))
+        ]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        return this_list.index(val)
 
     def delete_element(self):
         """ delete an element from the list """
@@ -228,9 +240,42 @@ class Argo:
     def update_element(self):
         """ update an element in the same location in the list """
 
-    def append_element(self):
+    # atomic function
+    def append_element(self, this_list, elem):
         """ append an element to the end of a list """
 
+        these_params = [
+            (this_list, list),
+            (elem, (str, int, float, bool, dict, list))
+        ]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        if this_list.append(elem):
+            return True
+
+        return False
+
+    # atomic function
+    def extend_list(self, this_list, new_list):
+        """append an element to the end of a list"""
+
+        these_params = [
+            (this_list, list),
+            (new_list, (list))]
+
+        param_check = self.__good_params(these_params)
+        if not param_check:
+            return param_check
+
+        if this_list.extend(this_list):
+            return True
+
+        return False
+
+    # atomic function
     def insert_element(self):
         """ insert an element into a list in order """
 
