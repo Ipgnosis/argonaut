@@ -2,8 +2,9 @@
 
 import os
 from pathlib import Path
+from colchis import Argo
 import config
-from colchis.classes.argo import Argo
+f
 
 
 # TEST_NAME = "owid-covid-data.json"
