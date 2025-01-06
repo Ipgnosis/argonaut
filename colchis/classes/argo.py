@@ -27,7 +27,7 @@ class Argo:
 
         param_check = self.__good_params(these_params)
         if param_check:
-            print(f"Instantiating '{json_path}' as an Argo object.")
+            print(f"\nInstantiating '{json_path}' as an Argo object.")
 
         # create global objects
         self.file_path = json_path
@@ -119,7 +119,7 @@ class Argo:
         # no param means use the instantiated object
         if not j_obj:
             this_obj = self.json_obj
-            print(f"Structure diagram for {self.file_path}")
+            print(f"Structure diagram for {self.file_path}:")
         else:
             # type checking on params
             these_params = [
@@ -140,9 +140,11 @@ class Argo:
 
         # run the output
         if isinstance(this_obj, dict):
+            if level == 0:
+                print(f"\nThe object is of type {type(this_obj)}")
             for key, value in this_obj.items():
                 if isinstance(value, dict):
-                    print(f"{spaces}key = {type(key)}: value = {type(value)}")
+                    print(f"\n{spaces}key = {type(key)}: value = {type(value)}")
                     # manage the scrolling
                     # line_count = self.__line_counter(line_count, lines)
                     # self.depict_struct(value, lines, level + 1, line_count)
@@ -153,9 +155,11 @@ class Argo:
                     print(f"{spaces}key = {type(key)}: value = {type(value)}")
 
         elif isinstance(this_obj, list):
+            if level == 0:
+                print(f"\nThe object is of type {type(this_obj)}")
             for index, item in enumerate(this_obj):
                 if isinstance(item, (dict, list)):
-                    print(f"{spaces}index = {index}: value = {type(item)}")
+                    print(f"\n{spaces}index = {index}: value = {type(item)}")
                     # manage the scrolling
                     # line_count = self.__line_counter(line_count, lines)
                     # self.depict_struct(item, lines, level + 1, line_count)
