@@ -3,12 +3,11 @@
 import os
 import sys
 
+print("This is the config.py from Argonaut")
+
 # create a project root for colchis
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 COLCHIS_PACKAGE = PROJECT_ROOT  # argonaut is the distributable package
 
 if COLCHIS_PACKAGE not in sys.path:  # Avoid adding multiple times
     sys.path.insert(0, COLCHIS_PACKAGE)  # Add to Python path
-
-# Add DATA_DIR to sys.path for file access
-DATA_DIR = os.path.join(COLCHIS_PACKAGE, "data")
