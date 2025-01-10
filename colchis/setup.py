@@ -1,8 +1,9 @@
+""" setup.py """
 from setuptools import setup, find_packages
 
 setup(
     name="colchis",
-    version="0.1.0",
+    version="0.3.0",
     packages=find_packages(),
     author="Russell Bennett",
     author_email="russell@beanbazaar.com",

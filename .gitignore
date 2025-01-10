@@ -1,5 +1,6 @@
 # exclude the contents of /data and other sensitive stuff
 /data/
+/tests/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
