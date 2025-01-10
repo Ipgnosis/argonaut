@@ -17,14 +17,33 @@ I seem to spend a lot of time writing code to perform operations on a JSON struc
 - Minimize coding errors
 - Minimize coding effort
 
+## Approach
+
+An arbitrary JSON file is:
+
+* Has a read path (and potentially a write path)
+
+* Either valid or invalid
+
+* Is either an object or a list
+
+* Is updated after instantiation or not
+
+* Has either a uniform or non-uniform structure
+
+**All** other considerations are file structure dependent.  Therefore, methods that are dependent on structure and contents should be implemented within *child* classes, e.g.:
+
+* fetch higher level data objects
+
+* add / update / delete data
+
 ## Imports
-import os
 
-from pathlib import Path
+* import os
 
-import config
+* from pathlib import Path
 
-from colchis.classes.argo import Argo
+* import config
 
 ## Instantiation
 
@@ -34,47 +53,35 @@ Where file_path is the valid path to a valid JSON file; 'x' is the class object 
 
 ## Methods Implemented
 
+__init__: sets:
+    file_path
+    json_obj
+    obj_struct
+    line_count
+
 write_json_data
 
 validate_json_data
 
-depict_json
+print_json
 
 depict_struct
+
+is_symmetrical
+
+analyze_object
+
+analyze_array
 
 __read_json_data
 
 __good_params
 
+__line_counter
+
 ## Methods awaiting implementation
 
-create_key_list
-
-create_value_list
-
-add_key_value
-
-delete_key_value
-
-update_key
-
-update_value
-
-find_key
-
-find_value
-
-find_except
-
-find_element
-
-delete_element
-
-update_element
-
-append_element
-
-insert_element
+__show_non_uniformity
 
 ## Background
 **Jason** was a character in Greek mythology.  He set off on a quest in a ship (the **Argo**), with a crew (the **Argonauts**) to a foreign land (**Colchis**, present day Georgia) to recover a legendary **Golden Fleece** in order to regain his rightful throne.  To gain the Golden Fleece, he was assigned several arduous tasks, which he *completed* though divine intervention.  Despite his triumph, Jason continued to encounter serious problems in life and ultimately died a poor man while asleep under the rotting Argo, which fell and killed him.  Hopefully, history doesn't repeat itself.

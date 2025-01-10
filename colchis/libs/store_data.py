@@ -148,14 +148,13 @@ def copy_all_files(here, there):
 
     return success
 
+
 def append_file(fpath, new_data):
     """ appends new data to existing file """
 
     old_data = read_json_data(fpath)
 
     # rename_file(fpath, old_version)
-
-
 
 
 def main():

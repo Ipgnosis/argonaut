@@ -4,8 +4,8 @@
 
     where possible, type checking is performed on parameters
 
-    there are also some methods that are public that will work on separate (non-instantiated)
-    json structures: this is intentional to aid development
+    there are also some methods that are public that will work on separate
+    (non-instantiated) json structures: this is intentional to aid development
 """
 
 import json
@@ -15,15 +15,13 @@ from pathlib import Path
 # the class definition for argonaut
 # see the README
 class Argo:
-    """ a class to facilitate json object operations """
+    """ a class to facilitate json object operations and reduce development effort """
 
     # instantiate
     def __init__(self, json_path):
 
         # type checking on params
-        these_params = [
-            (json_path, Path)
-        ]
+        these_params = [(json_path, Path)]
 
         param_check = self.__good_params(these_params)
         if param_check:
@@ -43,11 +41,7 @@ class Argo:
         """Takes a file path, data, write mode and writes data to the file"""
 
         # type checking on params
-        these_params = [
-            (file_path, Path),
-            (wdata, (list, dict)),
-            (mode, str)
-        ]
+        these_params = [(file_path, Path), (wdata, (list, dict)), (mode, str)]
 
         param_check = self.__good_params(these_params)
         if not param_check:
@@ -67,7 +61,7 @@ class Argo:
 
     # validate an external json object
     def validate_json_data(self, j_obj):
-        """ developer productivity feature: check the validity of a json object """
+        """developer productivity feature: check the validity of a json object"""
 
         # type checking on params
         these_params = [(j_obj, (list, dict))]
@@ -88,7 +82,7 @@ class Argo:
 
     # print out the file to the terminal with indentation
     def print_json(self, j_obj=None):
-        """ developer feature to show the object contents """
+        """developer feature to show the object contents"""
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
@@ -126,7 +120,6 @@ class Argo:
                 (j_obj, (list, dict)),
                 (lines, int),
                 (level, int)
-                # (line_count, int),
             ]
 
             param_check = self.__good_params(these_params)
@@ -143,11 +136,8 @@ class Argo:
             if level == 0:
                 print(f"\nThe object is of type {type(this_obj)}")
             for key, value in this_obj.items():
-                if isinstance(value, dict):
+                if isinstance(value, (dict, list)):
                     print(f"\n{spaces}key = {type(key)}: value = {type(value)}")
-                    # manage the scrolling
-                    # line_count = self.__line_counter(line_count, lines)
-                    # self.depict_struct(value, lines, level + 1, line_count)
                     self.__line_counter(lines)
                     self.depict_struct(value, lines, level + 1)
 
@@ -160,141 +150,92 @@ class Argo:
             for index, item in enumerate(this_obj):
                 if isinstance(item, (dict, list)):
                     print(f"\n{spaces}index = {index}: value = {type(item)}")
-                    # manage the scrolling
-                    # line_count = self.__line_counter(line_count, lines)
-                    # self.depict_struct(item, lines, level + 1, line_count)
                     self.__line_counter(lines)
                     self.depict_struct(item, lines, level + 1)
                 else:
-                    print(f"{spaces}index = {index}: value = {type(item)}")
+                    print(f"{spaces}value = {type(item)}")
 
         else:  # Handle other data types like strings, numbers, etc.
             print(f"{spaces}value = {type(this_obj)}: {this_obj}")
-            # manage the scrolling
-            # line_count = self.__line_counter(line_count, lines)
             self.__line_counter(lines)
 
         return True
 
-    # atomic function
-    def create_key_list(self, this_dict):
-        """ create a list of keys """
+    # reads the instantiated json object and returns True or False
+    # this ALMOST works - needs more testing at level 3
+    def is_symmetrical(self, data):
+        """
+        Checks if the given JSON object has a symmetrical structure recursively.
 
-        these_params = [(this_dict, dict)]
+        Args:
+        data: The JSON object to check.
 
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
+        Returns:
+        True if the structure is symmetrical, False otherwise.
+        """
+        if isinstance(data, list):
+            # Check if all elements in the list have the same type
+            if not data:  # Empty list is considered symmetrical
+                return True
+            first_item_type = type(data[0])
+            return all(isinstance(item, first_item_type) for item in data) and all(
+                self.is_symmetrical(item) for item in data
+            )
 
-        return list(this_dict)
+        elif isinstance(data, dict):
+            # Check if all values in the dictionary have the same type
+            if not data:  # Empty dictionary is considered symmetrical
+                return True
+            first_key = next(iter(data))
+            first_value_type = type(data[first_key])
+            return all(
+                isinstance(value, first_value_type) for value in data.values()
+            ) and all(self.is_symmetrical(value) for value in data.values())
 
-    def create_value_list(self):
-        """ create a list of valid values """
-
-    def add_key_value(self):
-        """ add a key value pair """
-
-    def delete_key_value(self):
-        """ delete a key:value pair """
-
-    def update_key(self):
-        """ update a key without changing the structure or the value """
-
-    def update_value(self):
-        """ update a value without changing the structure or the key """
-
-    def find_key(self):
-        """ find a key """
-
-    # atomic function
-    def get_value(self, this_dict, this_key):
-        """ get value from a dict given a key """
-
-        these_params = [
-            (this_dict, dict),
-            (this_key, (str))
-        ]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
-
-        return this_dict.get(this_key, f"get_value: key {this_key} not found.")
-
-    def find_except(self, this_list, exceptions_list):
-        """ find values except those in a list of values """
-
-    def find_element_index(self, this_list, val):
-        """ find an element in a list, return the index """
-
-        these_params = [
-            (this_list, list),
-            (val, (str, int, float, bool))
-        ]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
-
-        return this_list.index(val)
-
-    def delete_element(self):
-        """ delete an element from the list """
-
-    def update_element(self):
-        """ update an element in the same location in the list """
-
-    # atomic function
-    def append_element(self, this_list, elem):
-        """ append an element to the end of a list """
-
-        these_params = [
-            (this_list, list),
-            (elem, (str, int, float, bool, dict, list))
-        ]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
-
-        if this_list.append(elem):
+        else:
+            # Base case: simple types are considered symmetrical
             return True
 
-        return False
+    # returns the number of keys in a dict and the value types
+    def analyze_object(self, this_obj):
+        """analyze a dict in a json object"""
 
-    # atomic function
-    def extend_list(self, this_list, new_list):
-        """append an element to the end of a list"""
+        if not isinstance(this_obj, dict):
+            return False
 
-        these_params = [
-            (this_list, list),
-            (new_list, (list))]
+        num_keys = len(this_obj)
+        val_list = []
 
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
+        for val in this_obj.values():
+            val_list.append(type(val))
 
-        if this_list.extend(this_list):
-            return True
+        return (num_keys, val_list)
 
-        return False
+    # returns the number of elements in a list and the value types
+    def analyze_array(self, this_list):
+        """analyze a list in a json object"""
 
-    # atomic function
-    def insert_element(self):
-        """ insert an element into a list in order """
+        if not isinstance(this_list, list):
+            return False
+
+        num_vals = len(this_list)
+        val_list = []
+
+        for val in this_list:
+            val_list.append(type(val))
+
+        return (num_vals, val_list)
 
     # #################### private methods ############################
 
     # PRIVATE - read a json data file
     # called only by __init__ (maybe others later??)
-    # there's a case to be made that this method should be public, so that any json file can be read
-    # but the purpose of argonaut is to improve productivity on json wrangling
+    # but should this method be public, so that any json file can be read?
+    # the purpose of argonaut is to improve the productivity of json wrangling
     def __read_json_data(self, file_path):
-        """ Takes a file path and returns a file or an error """
+        """Takes a file path and returns a file or an error"""
 
-        these_params = [
-            (file_path, Path)
-        ]
+        these_params = [(file_path, Path)]
 
         param_check = self.__good_params(these_params)
         if not param_check:
@@ -313,21 +254,22 @@ class Argo:
 
     # PRIVATE - type checking on params for all other functions
     def __good_params(self, params):
-        """ takes a list of tuples and returns True or raises a TypeError """
+        """takes a list of tuples and returns True or raises a TypeError"""
 
         for param in params:
             allowed_types = param[1]
             if not isinstance(param[0], allowed_types):
-                raise TypeError(f"The parameter value '{param[0]}' is not of type {allowed_types}")
+                raise TypeError(
+                    f"The parameter value '{param[0]}' is not of type {allowed_types}"
+                )
 
         return True
 
     # PRIVATE - manage the line count for depict_struct
     # this doesn't work perfectly: the recursion breaks the line count
     # but it works well enough for now
-    # def __line_counter(self, line_count, lines):
     def __line_counter(self, lines):
-        """ manage the line-count and implement pause as required """
+        """manage the line-count and implement pause as required"""
 
         # increment line count since we have just printed a line
         self.line_count += 1
@@ -340,5 +282,3 @@ class Argo:
                 break
 
             self.line_count = 0
-
-        # return line_count
