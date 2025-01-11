@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 
-# the class definition for argonaut
+# the class definition for argonaut (aka colchis)
 # see the README
 class Argo:
     """ a class to facilitate json object operations and reduce development effort """
@@ -37,8 +37,18 @@ class Argo:
         self.line_count = 0
 
     # write a json data file
-    def write_json_data(self, file_path, wdata, mode):
+    def write_json_data(self, file_path=None, wdata=None, mode=None):
         """Takes a file path, data, write mode and writes data to the file"""
+
+        # insert the default params
+        if file_path is None:
+            file_path = self.file_path
+
+        if wdata is None:
+            wdata = self.json_obj
+
+        if mode is None:
+            mode = "w"
 
         # type checking on params
         these_params = [(file_path, Path), (wdata, (list, dict)), (mode, str)]
@@ -60,15 +70,19 @@ class Argo:
             return False
 
     # validate an external json object
-    def validate_json_data(self, j_obj):
+    # node that self.json_obj is pre-validated
+    def validate_json_data(self, j_obj=None):
         """developer productivity feature: check the validity of a json object"""
 
-        # type checking on params
-        these_params = [(j_obj, (list, dict))]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
+        # this gives the option of sending a random dict
+        # no param means use the instantiated object
+        if not j_obj:
+            j_obj = self.json_obj
+            print(f"Object output for {self.file_path}")
+        else:
+            # quick param check
+            if not isinstance(j_obj, (list, dict)):
+                return False
 
         # validate
         try:
@@ -87,32 +101,26 @@ class Argo:
         # this gives the option of sending a random dict
         # no param means use the instantiated object
         if not j_obj:
-            this_obj = self.json_obj
+            j_obj = self.json_obj
             print(f"Object output for {self.file_path}")
         else:
-            # type checking on params
-            these_params = [(j_obj, (list, dict))]
+            # quick param check
+            if not isinstance(j_obj, (list, dict)):
+                return False
 
-            param_check = self.__good_params(these_params)
-            if not param_check:
-                return param_check
-
-            this_obj = j_obj
-
-        # output the j_obj
-        print(json.dumps(this_obj, indent=4))
+        # output the data
+        print(json.dumps(j_obj, indent=4))
 
         return True
 
     # print out a json structure to the terminal with types and indentation
-    # def depict_struct(self, j_obj=None, lines=10, level=0, line_count=0):
     def depict_struct(self, j_obj=None, lines=10, level=0):
         """developer productivity feature to show a json object structure"""
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
         if not j_obj:
-            this_obj = self.json_obj
+            j_obj = self.json_obj
             print(f"Structure diagram for {self.file_path}:")
         else:
             # type checking on params
@@ -126,16 +134,14 @@ class Argo:
             if not param_check:
                 return param_check
 
-            this_obj = j_obj
-
         # calculate the indentation
         spaces = "     " * level
 
         # run the output
-        if isinstance(this_obj, dict):
+        if isinstance(j_obj, dict):
             if level == 0:
-                print(f"\nThe object is of type {type(this_obj)}")
-            for key, value in this_obj.items():
+                print(f"\nThe object is of type {type(j_obj)}")
+            for key, value in j_obj.items():
                 if isinstance(value, (dict, list)):
                     print(f"\n{spaces}key = {type(key)}: value = {type(value)}")
                     self.__line_counter(lines)
@@ -144,10 +150,10 @@ class Argo:
                 else:
                     print(f"{spaces}key = {type(key)}: value = {type(value)}")
 
-        elif isinstance(this_obj, list):
+        elif isinstance(j_obj, list):
             if level == 0:
-                print(f"\nThe object is of type {type(this_obj)}")
-            for index, item in enumerate(this_obj):
+                print(f"\nThe object is of type {type(j_obj)}")
+            for index, item in enumerate(j_obj):
                 if isinstance(item, (dict, list)):
                     print(f"\n{spaces}index = {index}: value = {type(item)}")
                     self.__line_counter(lines)
@@ -156,57 +162,68 @@ class Argo:
                     print(f"{spaces}value = {type(item)}")
 
         else:  # Handle other data types like strings, numbers, etc.
-            print(f"{spaces}value = {type(this_obj)}: {this_obj}")
+            print(f"{spaces}value = {type(j_obj)}: {j_obj}")
             self.__line_counter(lines)
 
         return True
 
     # reads the instantiated json object and returns True or False
     # this ALMOST works - needs more testing at level 3
-    def is_symmetrical(self, data):
+    def is_symmetrical(self, j_obj=None):
         """
         Checks if the given JSON object has a symmetrical structure recursively.
 
         Args:
-        data: The JSON object to check.
+        j_obj: The JSON object to check. This can be an external jSON but
+        the default is the instantiated object.
 
         Returns:
         True if the structure is symmetrical, False otherwise.
         """
-        if isinstance(data, list):
+
+        # quick param check
+        if j_obj:
+            if not isinstance(j_obj, (list, dict)):
+                return False
+        # substitute default param
+        else:
+            j_obj = self.json_obj
+
+        if isinstance(j_obj, list):
             # Check if all elements in the list have the same type
-            if not data:  # Empty list is considered symmetrical
+            if not j_obj:  # Empty list is considered symmetrical
                 return True
-            first_item_type = type(data[0])
-            return all(isinstance(item, first_item_type) for item in data) and all(
-                self.is_symmetrical(item) for item in data
+            first_item_type = type(j_obj[0])
+            return all(isinstance(item, first_item_type) for item in j_obj) and all(
+                self.is_symmetrical(item) for item in j_obj
             )
 
-        elif isinstance(data, dict):
+        elif isinstance(j_obj, dict):
             # Check if all values in the dictionary have the same type
-            if not data:  # Empty dictionary is considered symmetrical
+            if not j_obj:  # Empty dictionary is considered symmetrical
                 return True
-            first_key = next(iter(data))
-            first_value_type = type(data[first_key])
+            first_key = next(iter(j_obj))
+            first_value_type = type(j_obj[first_key])
             return all(
-                isinstance(value, first_value_type) for value in data.values()
-            ) and all(self.is_symmetrical(value) for value in data.values())
+                isinstance(value, first_value_type) for value in j_obj.values()
+            ) and all(self.is_symmetrical(value) for value in j_obj.values())
 
         else:
             # Base case: simple types are considered symmetrical
             return True
 
     # returns the number of keys in a dict and the value types
-    def analyze_object(self, this_obj):
+    def analyze_object(self, j_obj):
         """analyze a dict in a json object"""
 
-        if not isinstance(this_obj, dict):
+        # quick param check
+        if not isinstance(j_obj, dict):
             return False
 
-        num_keys = len(this_obj)
+        num_keys = len(j_obj)
         val_list = []
 
-        for val in this_obj.values():
+        for val in j_obj.values():
             val_list.append(type(val))
 
         return (num_keys, val_list)
@@ -215,6 +232,7 @@ class Argo:
     def analyze_array(self, this_list):
         """analyze a list in a json object"""
 
+        # quick param check
         if not isinstance(this_list, list):
             return False
 
@@ -235,11 +253,9 @@ class Argo:
     def __read_json_data(self, file_path):
         """Takes a file path and returns a file or an error"""
 
-        these_params = [(file_path, Path)]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
+        # quick param check
+        if not isinstance(file_path, Path):
+            return False
 
         try:
             with open(file_path, "r", encoding="utf-8") as json_file:
