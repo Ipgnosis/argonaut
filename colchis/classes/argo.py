@@ -38,7 +38,7 @@ class Argo:
 
     # write a json data file
     def write_json_data(self, file_path=None, wdata=None, mode=None):
-        """Takes a file path, data, write mode and writes data to the file"""
+        """ Takes a file path, data, write mode and writes data to the file """
 
         # insert the default params
         if file_path is None:
@@ -72,7 +72,7 @@ class Argo:
     # validate an external json object
     # node that self.json_obj is pre-validated
     def validate_json_data(self, j_obj=None):
-        """developer productivity feature: check the validity of a json object"""
+        """ developer productivity feature: check the validity of a json object """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
@@ -96,7 +96,7 @@ class Argo:
 
     # print out the file to the terminal with indentation
     def print_json(self, j_obj=None):
-        """developer feature to show the object contents"""
+        """ developer feature to show the object contents """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
@@ -115,12 +115,20 @@ class Argo:
 
     # print out a json structure to the terminal with types and indentation
     def depict_struct(self, j_obj=None, lines=10, level=0):
-        """developer productivity feature to show a json object structure"""
+        """ developer productivity feature to show a json object structure
+            recursive function...
+            params:
+                j_obj: valid json string
+                lines: the required number of lines for output
+                level: the current indentation level - used by recursive calls
+        """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
         if not j_obj:
             j_obj = self.json_obj
+            # reset the line_count to zero at the first invocation
+            self.line_count = 0
             print(f"Structure diagram for {self.file_path}:")
         else:
             # type checking on params
@@ -189,6 +197,7 @@ class Argo:
         else:
             j_obj = self.json_obj
 
+        # ignore the redundant "remove unnecessary elif" hint
         if isinstance(j_obj, list):
             # Check if all elements in the list have the same type
             if not j_obj:  # Empty list is considered symmetrical
@@ -214,7 +223,7 @@ class Argo:
 
     # returns the number of keys in a dict and the value types
     def analyze_object(self, j_obj):
-        """analyze a dict in a json object"""
+        """ analyze a dict in a json object """
 
         # quick param check
         if not isinstance(j_obj, dict):
@@ -230,7 +239,7 @@ class Argo:
 
     # returns the number of elements in a list and the value types
     def analyze_array(self, this_list):
-        """analyze a list in a json object"""
+        """ analyze a list in a json object """
 
         # quick param check
         if not isinstance(this_list, list):
@@ -251,11 +260,11 @@ class Argo:
     # but should this method be public, so that any json file can be read?
     # the purpose of argonaut is to improve the productivity of json wrangling
     def __read_json_data(self, file_path):
-        """Takes a file path and returns a file or an error"""
+        """ Takes a file path and returns a file or an error """
 
-        # quick param check
-        if not isinstance(file_path, Path):
-            return False
+        # quick param check - no need if PRIVATE - the path has already been param-checked
+        # if not isinstance(file_path, Path):
+        #    return False
 
         try:
             with open(file_path, "r", encoding="utf-8") as json_file:
@@ -270,31 +279,31 @@ class Argo:
 
     # PRIVATE - type checking on params for all other functions
     def __good_params(self, params):
-        """takes a list of tuples and returns True or raises a TypeError"""
+        """ takes a list of tuples and returns True or raises a TypeError """
 
         for param in params:
-            allowed_types = param[1]
-            if not isinstance(param[0], allowed_types):
+            if not isinstance(param[0], param[1]):
                 raise TypeError(
-                    f"The parameter value '{param[0]}' is not of type {allowed_types}"
+                    f"The parameter value '{param[0]}' is not of type {param[1]}"
                 )
 
         return True
 
     # PRIVATE - manage the line count for depict_struct
-    # this doesn't work perfectly: the recursion breaks the line count
-    # but it works well enough for now
+    # this doesn't work perfectly, but it works well enough for now
     def __line_counter(self, lines):
-        """manage the line-count and implement pause as required"""
+        """ manage the line-count and implement pause as required """
 
         # increment line count since we have just printed a line
         self.line_count += 1
 
         # have we breached the line limit?
-        if self.line_count > lines:
+        if self.line_count >= lines:
 
+            # break for reading
             while True:
                 input("Press 'Enter' to continue, or 'CTRL-C' to stop...")
                 break
 
+            # reset line count
             self.line_count = 0
