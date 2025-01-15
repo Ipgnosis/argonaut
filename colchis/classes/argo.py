@@ -21,11 +21,11 @@ class Argo:
     def __init__(self, json_path):
 
         # type checking on params
-        these_params = [(json_path, Path)]
+        if not self.__good_params([(json_path, Path)]):
+            return
 
-        param_check = self.__good_params(these_params)
-        if param_check:
-            print(f"\nInstantiating '{json_path}' as an Argo object.")
+        # proceed
+        print(f"\nInstantiating '{json_path}' as an Argo object.")
 
         # create global objects
         self.file_path = json_path
