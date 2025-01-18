@@ -20,7 +20,7 @@ class Argo:
     # instantiate
     def __init__(self, json_path):
 
-        # type checking on params
+        # type check on path param
         if not self.__good_params([(json_path, Path)]):
             return
 
@@ -30,10 +30,13 @@ class Argo:
         # create global objects
         self.file_path = json_path
 
+        # load the json file
         self.json_obj = self.__read_json_data(self.file_path)
 
+        # this allows conditional method calls
         self.obj_struct = type(self.json_obj)
 
+        # this is a 'global' for depict_struct
         self.line_count = 0
 
     # write a json data file
