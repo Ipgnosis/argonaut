@@ -9,7 +9,8 @@
 """
 
 import json
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
+from typing import Union, Optional, Literal, Any, List, Dict
 
 
 # the class definition for argonaut (aka colchis)
@@ -18,29 +19,23 @@ class Argo:
     """ a class to facilitate json object operations and reduce development effort """
 
     # instantiate
-    def __init__(self, json_path):
+    def __init__(self, json_path: Path):
+        if not isinstance(json_path, (PosixPath, WindowsPath)):
+            raise TypeError(f"The json_path parameter must be a Path object, not {type(json_path)}")
 
-        # type check on path param
-        if not self.__good_params([(json_path, Path)]):
-            return
-
-        # proceed
         print(f"\nInstantiating '{json_path}' as an Argo object.")
 
         # create global objects
         self.file_path = json_path
 
         # load the json file
-        self.json_obj = self.__read_json_data(self.file_path)
-
-        # this allows conditional method calls
-        self.obj_struct = type(self.json_obj)
+        self.json_obj: Union[Dict, List, None] = self.__read_json_data(self.file_path)
 
         # this is a 'global' for depict_struct
         self.line_count = 0
 
     # write a json data file
-    def write_json_data(self, file_path=None, wdata=None, mode=None):
+    def write_json_data(self, file_path: Optional[Path] = None, wdata: Optional[Union[list, dict]] = None, mode: Literal["w", "a"] = "w"):
         """ Takes a file path, data, write mode and writes data to the file """
 
         # insert the default params
@@ -53,18 +48,10 @@ class Argo:
         if mode is None:
             mode = "w"
 
-        # type checking on params
-        these_params = [(file_path, Path), (wdata, (list, dict)), (mode, str)]
-
-        param_check = self.__good_params(these_params)
-        if not param_check:
-            return param_check
-
         try:
             with open(file_path, mode, encoding="utf-8") as outfile:
                 json.dump(wdata, outfile, indent=4, ensure_ascii=False)
-            # The file is automatically closed when the 'with' block ends
-            return True
+            return True  # The file is automatically closed when the 'with' block ends
         except json.decoder.JSONDecodeError as e:
             print(f"{e}: file {file_path} is not valid JSON")
             return False
@@ -74,7 +61,7 @@ class Argo:
 
     # validate an external json object
     # node that self.json_obj is pre-validated
-    def validate_json_data(self, j_obj=None):
+    def validate_json_data(self, j_obj: Optional[Union[list, dict]] = None) -> bool:
         """ developer productivity feature: check the validity of a json object """
 
         # this gives the option of sending a random dict
@@ -98,7 +85,7 @@ class Argo:
             return False
 
     # print out the file to the terminal with indentation
-    def print_json(self, j_obj=None):
+    def print_json(self, j_obj: Optional[Union[list, dict]] = None) -> bool:
         """ developer feature to show the object contents """
 
         # this gives the option of sending a random dict
@@ -117,7 +104,7 @@ class Argo:
         return True
 
     # print out a json structure to the terminal with types and indentation
-    def depict_struct(self, j_obj=None, lines=10, level=0):
+    def depict_struct(self, j_obj: Optional[Union[list, dict]] = None, lines: int = 10, level: int = 0) -> bool:
         """ developer productivity feature to show a json object structure
             recursive function...
             params:
@@ -133,17 +120,6 @@ class Argo:
             # reset the line_count to zero at the first invocation
             self.line_count = 0
             print(f"Structure diagram for {self.file_path}:")
-        else:
-            # type checking on params
-            these_params = [
-                (j_obj, (list, dict)),
-                (lines, int),
-                (level, int)
-            ]
-
-            param_check = self.__good_params(these_params)
-            if not param_check:
-                return param_check
 
         # calculate the indentation
         spaces = "     " * level
@@ -180,7 +156,7 @@ class Argo:
 
     # reads the instantiated json object and returns True or False
     # this ALMOST works - needs more testing at level 3
-    def is_symmetrical(self, j_obj=None):
+    def is_symmetrical(self, j_obj: Optional[Any] = None) -> bool:
         """
         Checks if the given JSON object has a symmetrical structure recursively.
 
@@ -225,12 +201,8 @@ class Argo:
             return True
 
     # returns the number of keys in a dict and the value types
-    def analyze_object(self, j_obj):
+    def analyze_object(self, j_obj: dict) -> tuple[int, list]:
         """ analyze a dict in a json object """
-
-        # quick param check
-        if not isinstance(j_obj, dict):
-            return False
 
         num_keys = len(j_obj)
         val_list = []
@@ -241,12 +213,8 @@ class Argo:
         return (num_keys, val_list)
 
     # returns the number of elements in a list and the value types
-    def analyze_array(self, this_list):
+    def analyze_array(self, this_list: list) -> tuple[int, list]:
         """ analyze a list in a json object """
-
-        # quick param check
-        if not isinstance(this_list, list):
-            return False
 
         num_vals = len(this_list)
         val_list = []
@@ -261,13 +229,9 @@ class Argo:
     # PRIVATE - read a json data file
     # called only by __init__ (maybe others later??)
     # but should this method be public, so that any json file can be read?
-    # the purpose of argonaut is to improve the productivity of json wrangling
-    def __read_json_data(self, file_path):
+    # the purpose of argonaut is to improve the productivity of json wrangling.
+    def __read_json_data(self, file_path: Path) -> Union[Dict, List, None]:
         """ Takes a file path and returns a file or an error """
-
-        # quick param check - no need if PRIVATE - the path has already been param-checked
-        # if not isinstance(file_path, Path):
-        #    return False
 
         try:
             with open(file_path, "r", encoding="utf-8") as json_file:
@@ -275,22 +239,10 @@ class Argo:
             # The file is automatically closed when the 'with' block ends
         except json.decoder.JSONDecodeError as e:
             print(f"{e}: file {file_path} is not valid JSON")
-            return False
+            return None
         except OSError as error:
             print(f"{error}: File {file_path} cannot be read")
-            return False
-
-    # PRIVATE - type checking on params for all other functions
-    def __good_params(self, params):
-        """ takes a list of tuples and returns True or raises a TypeError """
-
-        for param in params:
-            if not isinstance(param[0], param[1]):
-                raise TypeError(
-                    f"The parameter value '{param[0]}' is not of type {param[1]}"
-                )
-
-        return True
+            return None
 
     # PRIVATE - manage the line count for depict_struct
     # this doesn't work perfectly, but it works well enough for now
