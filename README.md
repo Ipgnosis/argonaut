@@ -19,11 +19,11 @@ I seem to spend a lot of time writing code to perform operations on a JSON struc
 
 ## Approach
 
-An arbitrary JSON file is:
+An arbitrary JSON file:
 
 * Has a read path (and potentially a write path)
 
-* Either valid or invalid
+* Is either valid or invalid
 
 * Is either an object or a list
 
@@ -74,8 +74,6 @@ analyze_object
 analyze_array
 
 __read_json_data
-
-__good_params
 
 __line_counter
 
