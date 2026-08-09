@@ -1,87 +1,51 @@
 # Colchis
 
-A work in progress...
+A small package, built around one class (`Argo`), for loading, validating, pretty-printing, and inspecting the structure of a JSON file — the boilerplate around `json.load`/`json.dumps`/`pprint` that ends up rewritten in every script that touches JSON.
 
-A package, implemented as a Class, to generalize JSON traversal and processing.
+See IETF RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format — <https://datatracker.ietf.org/doc/html/rfc8259>
 
-See IETF RFC8259: The Javascript Object Notation (JSON) Data Interchange Format https://datatracker.ietf.org/doc/html/rfc8259
+## What this is (and isn't)
 
-## Purpose
+`Argo` is intentionally thin: load a JSON file, check it's valid, print it, inspect its structure and type-uniformity. It is **not** a general JSON query/traversal/diffing engine — for querying, reach for [`jmespath`](https://jmespath.org/) or [`glom`](https://glom.readthedocs.io/); for schema validation, [`pydantic`](https://docs.pydantic.dev/) or [`jsonschema`](https://python-jsonschema.readthedocs.io/); for structural diffing, [`deepdiff`](https://zepworks.com/deepdiff/); for richer pretty-printing, [`rich`](https://rich.readthedocs.io/). See `docs/DECISIONS.md` (2026-08-09) for why this project stays scoped rather than growing into a reimplementation of any of those.
 
-I seem to spend a lot of time writing code to perform operations on a JSON structure. I wonder if I can automate this?
+## Install
 
-### The minimum goal is a package that does the 'heavy lifting':
+```bash
+pip install -e .
+```
 
-- Reduce duplication of effort
-- Maximize compute performance
-- Minimize coding errors
-- Minimize coding effort
+(from the repo root. This repo's default dev environment is the `bb-env` conda environment — see `CLAUDE.md`.)
 
-## Approach
+## Usage
 
-An arbitrary JSON file is:
+```python
+from pathlib import Path
+from colchis.argo import Argo
 
-* Has a read path (and potentially a write path)
+obj = Argo(Path("data/example.json"))
 
-* Either valid or invalid
+obj.validate_json_data()          # -> bool
+obj.print_json()                  # pretty-prints to stdout
+obj.depict_struct()               # prints a type-annotated structure diagram
+obj.is_symmetrical()              # -> bool: is every level of the structure type-uniform?
+obj.analyze_object(obj.json_obj)  # -> (num_keys, [value types])
+obj.write_json_data()             # writes self.json_obj back to self.file_path
+```
 
-* Is either an object or a list
+Most methods accept an optional external JSON object (`j_obj`) instead of operating on the instantiated file, so the same logic works on ad hoc structures too.
 
-* Is updated after instantiation or not
+## File-management helpers
 
-* Has either a uniform or non-uniform structure
+`colchis.file_ops` has a few standalone functions (`delete_file`, `rename_file`, `move_files`, `delete_all_files`, `copy_all_files`) that aren't JSON-specific and don't belong on `Argo`.
 
-**All** other considerations are file structure dependent.  Therefore, methods that are dependent on structure and contents should be implemented within *child* classes, e.g.:
+## Development
 
-* fetch higher level data objects
-
-* add / update / delete data
-
-## Imports
-
-* import os
-
-* from pathlib import Path
-
-* import config
-
-## Instantiation
-
-x = Argo(file_path)
-
-Where file_path is the valid path to a valid JSON file; 'x' is the class object of the json file
-
-## Methods Implemented
-
-__init__: sets:
-    file_path
-    json_obj
-    obj_struct
-    line_count
-
-write_json_data
-
-validate_json_data
-
-print_json
-
-depict_struct
-
-is_symmetrical
-
-analyze_object
-
-analyze_array
-
-__read_json_data
-
-__good_params
-
-__line_counter
-
-## Methods awaiting implementation
-
-__show_non_uniformity
+```bash
+pytest          # run the test suite
+ruff check .    # lint
+mypy src        # type-check
+```
 
 ## Background
+
 **Jason** was a character in Greek mythology.  He set off on a quest in a ship (the **Argo**), with a crew (the **Argonauts**) to a foreign land (**Colchis**, present day Georgia) to recover a legendary **Golden Fleece** in order to regain his rightful throne.  To gain the Golden Fleece, he was assigned several arduous tasks, which he *completed* though divine intervention.  Despite his triumph, Jason continued to encounter serious problems in life and ultimately died a poor man while asleep under the rotting Argo, which fell and killed him.  Hopefully, history doesn't repeat itself.

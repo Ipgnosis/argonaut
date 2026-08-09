@@ -10,7 +10,7 @@
 
 import json
 from pathlib import Path, PosixPath, WindowsPath
-from typing import Union, Optional, Literal, Any, List, Dict
+from typing import Any, Literal
 
 
 # the class definition for argonaut (aka colchis)
@@ -29,13 +29,18 @@ class Argo:
         self.file_path = json_path
 
         # load the json file
-        self.json_obj: Union[Dict, List, None] = self.__read_json_data(self.file_path)
+        self.json_obj: dict | list | None = self.__read_json_data(self.file_path)
 
         # this is a 'global' for depict_struct
         self.line_count = 0
 
     # write a json data file
-    def write_json_data(self, file_path: Optional[Path] = None, wdata: Optional[Union[list, dict]] = None, mode: Literal["w", "a"] = "w"):
+    def write_json_data(
+        self,
+        file_path: Path | None = None,
+        wdata: list | dict | None = None,
+        mode: Literal["w", "a"] = "w",
+    ):
         """ Takes a file path, data, write mode and writes data to the file """
 
         # insert the default params
@@ -61,7 +66,7 @@ class Argo:
 
     # validate an external json object
     # node that self.json_obj is pre-validated
-    def validate_json_data(self, j_obj: Optional[Union[list, dict]] = None) -> bool:
+    def validate_json_data(self, j_obj: list | dict | None = None) -> bool:
         """ developer productivity feature: check the validity of a json object """
 
         # this gives the option of sending a random dict
@@ -85,7 +90,7 @@ class Argo:
             return False
 
     # print out the file to the terminal with indentation
-    def print_json(self, j_obj: Optional[Union[list, dict]] = None) -> bool:
+    def print_json(self, j_obj: list | dict | None = None) -> bool:
         """ developer feature to show the object contents """
 
         # this gives the option of sending a random dict
@@ -104,7 +109,7 @@ class Argo:
         return True
 
     # print out a json structure to the terminal with types and indentation
-    def depict_struct(self, j_obj: Optional[Union[list, dict]] = None, lines: int = 10, level: int = 0) -> bool:
+    def depict_struct(self, j_obj: list | dict | None = None, lines: int = 10, level: int = 0) -> bool:
         """ developer productivity feature to show a json object structure
             recursive function...
             params:
@@ -154,9 +159,7 @@ class Argo:
 
         return True
 
-    # reads the instantiated json object and returns True or False
-    # this ALMOST works - needs more testing at level 3
-    def is_symmetrical(self, j_obj: Optional[Any] = None) -> bool:
+    def is_symmetrical(self, j_obj: Any | None = None) -> bool:
         """
         Checks if the given JSON object has a symmetrical structure recursively.
 
@@ -168,14 +171,19 @@ class Argo:
         True if the structure is symmetrical, False otherwise.
         """
 
-        # quick param check
-        if j_obj:
-            if not isinstance(j_obj, (list, dict)):
-                return False
-        # substitute default param
-        else:
+        # substitute default param - explicit `is None` (not truthiness) so
+        # a falsy-but-real external value (0, "", [], {}) isn't mistaken for
+        # "no param given". The recursive traversal itself never re-applies
+        # this substitution (see __is_symmetrical_recursive), so a scalar
+        # leaf value encountered during recursion (including a falsy one)
+        # is handled by the base case below rather than looping back here.
+        if j_obj is None:
             j_obj = self.json_obj
 
+        return self.__is_symmetrical_recursive(j_obj)
+
+    # PRIVATE - the actual recursive traversal behind is_symmetrical
+    def __is_symmetrical_recursive(self, j_obj: Any) -> bool:
         # ignore the redundant "remove unnecessary elif" hint
         if isinstance(j_obj, list):
             # Check if all elements in the list have the same type
@@ -183,7 +191,7 @@ class Argo:
                 return True
             first_item_type = type(j_obj[0])
             return all(isinstance(item, first_item_type) for item in j_obj) and all(
-                self.is_symmetrical(item) for item in j_obj
+                self.__is_symmetrical_recursive(item) for item in j_obj
             )
 
         elif isinstance(j_obj, dict):
@@ -194,10 +202,11 @@ class Argo:
             first_value_type = type(j_obj[first_key])
             return all(
                 isinstance(value, first_value_type) for value in j_obj.values()
-            ) and all(self.is_symmetrical(value) for value in j_obj.values())
+            ) and all(self.__is_symmetrical_recursive(value) for value in j_obj.values())
 
         else:
-            # Base case: simple types are considered symmetrical
+            # Base case: simple types (including a falsy one, or a JSON
+            # `null` recursed into as Python None) are considered symmetrical
             return True
 
     # returns the number of keys in a dict and the value types
@@ -230,11 +239,11 @@ class Argo:
     # called only by __init__ (maybe others later??)
     # but should this method be public, so that any json file can be read?
     # the purpose of argonaut is to improve the productivity of json wrangling.
-    def __read_json_data(self, file_path: Path) -> Union[Dict, List, None]:
+    def __read_json_data(self, file_path: Path) -> dict | list | None:
         """ Takes a file path and returns a file or an error """
 
         try:
-            with open(file_path, "r", encoding="utf-8") as json_file:
+            with open(file_path, encoding="utf-8") as json_file:
                 return json.load(json_file)
             # The file is automatically closed when the 'with' block ends
         except json.decoder.JSONDecodeError as e:
