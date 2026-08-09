@@ -1,6 +1,6 @@
-"""Tests for colchis.file_ops."""
+"""Tests for file_ops."""
 
-from colchis import file_ops
+import file_ops
 
 
 def test_delete_file(tmp_path):

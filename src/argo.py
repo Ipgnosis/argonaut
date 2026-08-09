@@ -1,47 +1,63 @@
-""" class definition for Argo
-    takes one param on instantiation:
-        json_path: the path to the json file being processed
+"""class definition for Argo
+takes one param on instantiation:
+    json_path: the path to the json file being processed
 
-    where possible, type checking is performed on parameters
+where possible, type checking is performed on parameters
 
-    there are also some methods that are public that will work on separate
-    (non-instantiated) json structures: this is intentional to aid development
+there are also some methods that are public that will work on separate
+(non-instantiated) json structures: this is intentional to aid development
 """
 
+from __future__ import annotations
+
 import json
-from pathlib import Path, PosixPath, WindowsPath
+from pathlib import Path
 from typing import Any, Literal
+
+# NOTE: a JSON object/array is written out in full (`dict[str, Any] | list[Any]`)
+# at every use below rather than factored into a named type alias - not a
+# fully recursive JSON type either, which Python's type system handles
+# awkwardly for little practical benefit here (nested values are still real
+# JSON, just typed as Any at that depth). A named alias was tried and
+# reverted: Pylance strict mode reported `reportUnknownVariableType` on the
+# alias itself even with an explicit `TypeAlias` annotation (a known Pyright
+# rough edge for this exact pattern), cascading into every signature that
+# used it. Writing the union inline sidesteps the ambiguity entirely.
 
 
 # the class definition for argonaut (aka colchis)
 # see the README
 class Argo:
-    """ a class to facilitate json object operations and reduce development effort """
+    """a class to facilitate json object operations and reduce development effort"""
 
     # instantiate
-    def __init__(self, json_path: Path):
-        if not isinstance(json_path, (PosixPath, WindowsPath)):
-            raise TypeError(f"The json_path parameter must be a Path object, not {type(json_path)}")
+    def __init__(self, json_path: Path) -> None:
+        if not isinstance(json_path, Path):
+            raise TypeError(
+                f"The json_path parameter must be a Path object, not {type(json_path)}"
+            )
 
         print(f"\nInstantiating '{json_path}' as an Argo object.")
 
         # create global objects
-        self.file_path = json_path
+        self.file_path: Path = json_path
 
         # load the json file
-        self.json_obj: dict | list | None = self.__read_json_data(self.file_path)
+        self.json_obj: dict[str, Any] | list[Any] | None = self.__read_json_data(
+            self.file_path
+        )
 
         # this is a 'global' for depict_struct
-        self.line_count = 0
+        self.line_count: int = 0
 
     # write a json data file
     def write_json_data(
         self,
         file_path: Path | None = None,
-        wdata: list | dict | None = None,
+        wdata: dict[str, Any] | list[Any] | None = None,
         mode: Literal["w", "a"] = "w",
-    ):
-        """ Takes a file path, data, write mode and writes data to the file """
+    ) -> bool:
+        """Takes a file path, data, write mode and writes data to the file"""
 
         # insert the default params
         if file_path is None:
@@ -57,8 +73,8 @@ class Argo:
             with open(file_path, mode, encoding="utf-8") as outfile:
                 json.dump(wdata, outfile, indent=4, ensure_ascii=False)
             return True  # The file is automatically closed when the 'with' block ends
-        except json.decoder.JSONDecodeError as e:
-            print(f"{e}: file {file_path} is not valid JSON")
+        except TypeError as e:
+            print(f"{e}: data is not valid JSON")
             return False
         except OSError as error:
             print(f"{error}: file {file_path} cannot be saved")
@@ -66,12 +82,14 @@ class Argo:
 
     # validate an external json object
     # node that self.json_obj is pre-validated
-    def validate_json_data(self, j_obj: list | dict | None = None) -> bool:
-        """ developer productivity feature: check the validity of a json object """
+    def validate_json_data(
+        self, j_obj: dict[str, Any] | list[Any] | None = None
+    ) -> bool:
+        """developer productivity feature: check the validity of a json object"""
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
-        if not j_obj:
+        if j_obj is None:
             j_obj = self.json_obj
             print(f"Object output for {self.file_path}")
         else:
@@ -85,17 +103,17 @@ class Argo:
                 print("Valid JSON syntax.")
                 return True
             return False
-        except json.decoder.JSONDecodeError as e:
+        except (json.decoder.JSONDecodeError, TypeError) as e:
             print(f"Invalid JSON syntax: {e}")
             return False
 
     # print out the file to the terminal with indentation
-    def print_json(self, j_obj: list | dict | None = None) -> bool:
-        """ developer feature to show the object contents """
+    def print_json(self, j_obj: dict[str, Any] | list[Any] | None = None) -> bool:
+        """developer feature to show the object contents"""
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
-        if not j_obj:
+        if j_obj is None:
             j_obj = self.json_obj
             print(f"Object output for {self.file_path}")
         else:
@@ -109,18 +127,23 @@ class Argo:
         return True
 
     # print out a json structure to the terminal with types and indentation
-    def depict_struct(self, j_obj: list | dict | None = None, lines: int = 10, level: int = 0) -> bool:
-        """ developer productivity feature to show a json object structure
-            recursive function...
-            params:
-                j_obj: valid json string
-                lines: the required number of lines for output
-                level: the current indentation level - used by recursive calls
+    def depict_struct(
+        self,
+        j_obj: dict[str, Any] | list[Any] | None = None,
+        lines: int = 10,
+        level: int = 0,
+    ) -> bool:
+        """developer productivity feature to show a json object structure
+        recursive function...
+        params:
+            j_obj: valid json string
+            lines: the required number of lines for output
+            level: the current indentation level - used by recursive calls
         """
 
         # this gives the option of sending a random dict
         # no param means use the instantiated object
-        if not j_obj:
+        if j_obj is None:
             j_obj = self.json_obj
             # reset the line_count to zero at the first invocation
             self.line_count = 0
@@ -202,7 +225,9 @@ class Argo:
             first_value_type = type(j_obj[first_key])
             return all(
                 isinstance(value, first_value_type) for value in j_obj.values()
-            ) and all(self.__is_symmetrical_recursive(value) for value in j_obj.values())
+            ) and all(
+                self.__is_symmetrical_recursive(value) for value in j_obj.values()
+            )
 
         else:
             # Base case: simple types (including a falsy one, or a JSON
@@ -210,11 +235,11 @@ class Argo:
             return True
 
     # returns the number of keys in a dict and the value types
-    def analyze_object(self, j_obj: dict) -> tuple[int, list]:
-        """ analyze a dict in a json object """
+    def analyze_object(self, j_obj: dict[str, Any]) -> tuple[int, list[type[Any]]]:
+        """analyze a dict in a json object"""
 
         num_keys = len(j_obj)
-        val_list = []
+        val_list: list[type[Any]] = []
 
         for val in j_obj.values():
             val_list.append(type(val))
@@ -222,11 +247,11 @@ class Argo:
         return (num_keys, val_list)
 
     # returns the number of elements in a list and the value types
-    def analyze_array(self, this_list: list) -> tuple[int, list]:
-        """ analyze a list in a json object """
+    def analyze_array(self, this_list: list[Any]) -> tuple[int, list[type[Any]]]:
+        """analyze a list in a json object"""
 
         num_vals = len(this_list)
-        val_list = []
+        val_list: list[type[Any]] = []
 
         for val in this_list:
             val_list.append(type(val))
@@ -239,8 +264,8 @@ class Argo:
     # called only by __init__ (maybe others later??)
     # but should this method be public, so that any json file can be read?
     # the purpose of argonaut is to improve the productivity of json wrangling.
-    def __read_json_data(self, file_path: Path) -> dict | list | None:
-        """ Takes a file path and returns a file or an error """
+    def __read_json_data(self, file_path: Path) -> dict[str, Any] | list[Any] | None:
+        """Takes a file path and returns a file or an error"""
 
         try:
             with open(file_path, encoding="utf-8") as json_file:
@@ -255,8 +280,8 @@ class Argo:
 
     # PRIVATE - manage the line count for depict_struct
     # this doesn't work perfectly, but it works well enough for now
-    def __line_counter(self, lines):
-        """ manage the line-count and implement pause as required """
+    def __line_counter(self, lines: int) -> None:
+        """manage the line-count and implement pause as required"""
 
         # increment line count since we have just printed a line
         self.line_count += 1

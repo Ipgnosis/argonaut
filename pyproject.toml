@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "colchis"
-version = "0.4.0"
-description = "A small package, built around one class (Argo), for loading, validating, pretty-printing, and inspecting the structure of a JSON file."
+name = "argonaut"
+version = "0.5.1"
+description = "A small module (Argo), for loading, validating, pretty-printing, and inspecting the structure of a JSON file."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Russell Bennett", email = "russell@beanbazaar.com" }]
@@ -20,11 +20,14 @@ dependencies = []
 dev = ["pytest", "ruff", "mypy"]
 
 [project.urls]
-Homepage = "https://github.com/Ipgnosis/colchis"
-Issues = "https://github.com/Ipgnosis/colchis/issues"
+Homepage = "https://github.com/Ipgnosis/argonaut"
+Issues = "https://github.com/Ipgnosis/argonaut/issues"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+py-modules = ["argo", "file_ops"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

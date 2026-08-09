@@ -3,8 +3,13 @@
 import os
 import shutil
 
+# NOTE: path params are written out in full (`str | os.PathLike[str]`) at
+# every use below rather than factored into a named type alias - see
+# src/argo.py's top-of-file note for why (a named alias triggered a Pylance
+# strict-mode false positive even with an explicit `TypeAlias` annotation).
 
-def delete_file(fname):
+
+def delete_file(fname: str | os.PathLike[str]) -> bool:
     """ Delete the param file path """
 
     try:
@@ -15,7 +20,7 @@ def delete_file(fname):
         return False
 
 
-def rename_file(fromf, tof):
+def rename_file(fromf: str | os.PathLike[str], tof: str | os.PathLike[str]) -> bool:
     """ Rename a file in a path """
 
     try:
@@ -26,23 +31,23 @@ def rename_file(fromf, tof):
         return False
 
 
-def move_files(fromPath, toPath):
+def move_files(from_path: str | os.PathLike[str], to_path: str | os.PathLike[str]) -> bool:
     """ move all files in one directory to another """
 
-    # Check if fromPath dir exists first, if not, return False
-    if not os.path.exists(fromPath):
+    # Check if from_path dir exists first, if not, return False
+    if not os.path.exists(from_path):
         return False
 
-    # Check if toPath dir exists first, if not, create the folder
-    if not os.path.exists(toPath):
-        os.mkdir(toPath)
+    # Check if to_path dir exists first, if not, create the folder
+    if not os.path.exists(to_path):
+        os.mkdir(to_path)
 
     success = True
 
-    for file in os.listdir(fromPath):
+    for file in os.listdir(from_path):
         try:
-            source = os.path.join(fromPath, file)
-            destination = os.path.join(toPath, file)
+            source = os.path.join(from_path, file)
+            destination = os.path.join(to_path, file)
             shutil.move(source, destination)
         except OSError as error:
             print(f"File {file} cannot be moved: {error}")
@@ -51,7 +56,7 @@ def move_files(fromPath, toPath):
     return success
 
 
-def delete_all_files(this_path):
+def delete_all_files(this_path: str | os.PathLike[str]) -> bool:
     """ delete all files in a directory """
 
     # Check if path dir exists first, if not, return False
@@ -67,7 +72,7 @@ def delete_all_files(this_path):
     return success
 
 
-def copy_all_files(here, there):
+def copy_all_files(here: str | os.PathLike[str], there: str | os.PathLike[str]) -> bool:
     """copy all files in a directory to another directory """
 
     # Check if 'here' path dir exists first, if not, return False

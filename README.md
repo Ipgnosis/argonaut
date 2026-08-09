@@ -1,6 +1,8 @@
-# Colchis
+# Argonaut
 
-A small package, built around one class (`Argo`), for loading, validating, pretty-printing, and inspecting the structure of a JSON file — the boilerplate around `json.load`/`json.dumps`/`pprint` that ends up rewritten in every script that touches JSON.
+A small module, built around one class (`Argo`), for loading, validating, pretty-printing, and inspecting the structure of a JSON file — the boilerplate around `json.load`/`json.dumps`/`pprint` that ends up rewritten in every script that touches JSON.
+
+Ships as two flat modules (`argo`, `file_ops`) — no package wrapper, no PyPI publishing — meant for pulling into other repos with a plain editable/git install and importing directly, e.g. `from argo import Argo`.
 
 See IETF RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format — <https://datatracker.ietf.org/doc/html/rfc8259>
 
@@ -14,13 +16,13 @@ See IETF RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format
 pip install -e .
 ```
 
-(from the repo root. This repo's default dev environment is the `bb-env` conda environment — see `CLAUDE.md`.)
+(from the repo root, into whatever environment needs it — this repo's own default dev environment is the `bb-env` conda environment, see `CLAUDE.md`. From another repo: `pip install git+https://github.com/Ipgnosis/argonaut.git`, or a local editable install pointed at this repo's path.)
 
 ## Usage
 
 ```python
 from pathlib import Path
-from colchis.argo import Argo
+from argo import Argo
 
 obj = Argo(Path("data/example.json"))
 
@@ -36,7 +38,7 @@ Most methods accept an optional external JSON object (`j_obj`) instead of operat
 
 ## File-management helpers
 
-`colchis.file_ops` has a few standalone functions (`delete_file`, `rename_file`, `move_files`, `delete_all_files`, `copy_all_files`) that aren't JSON-specific and don't belong on `Argo`.
+`file_ops` has a few standalone functions (`delete_file`, `rename_file`, `move_files`, `delete_all_files`, `copy_all_files`) that aren't JSON-specific and don't belong on `Argo`.
 
 ## Development
 

@@ -1,10 +1,10 @@
-"""Tests for colchis.argo.Argo."""
+"""Tests for argo.Argo."""
 
 import json
 
 import pytest
 
-from colchis.argo import Argo
+from argo import Argo
 
 
 def write_json(path, data):
@@ -57,6 +57,12 @@ def test_write_json_data_uses_instance_defaults(uniform_dict_path):
     assert json.loads(uniform_dict_path.read_text(encoding="utf-8")) == {"changed": True}
 
 
+def test_write_json_data_returns_false_for_non_serializable_data(uniform_dict_path, tmp_path):
+    obj = Argo(uniform_dict_path)
+    out_path = tmp_path / "written.json"
+    assert obj.write_json_data(file_path=out_path, wdata={"bad": {1, 2, 3}}) is False
+
+
 def test_validate_json_data_on_instance_object(uniform_dict_path):
     obj = Argo(uniform_dict_path)
     assert obj.validate_json_data() is True
@@ -65,6 +71,11 @@ def test_validate_json_data_on_instance_object(uniform_dict_path):
 def test_validate_json_data_rejects_non_list_dict(uniform_dict_path):
     obj = Argo(uniform_dict_path)
     assert obj.validate_json_data("not a list or dict") is False
+
+
+def test_validate_json_data_returns_false_for_non_serializable_data(uniform_dict_path):
+    obj = Argo(uniform_dict_path)
+    assert obj.validate_json_data({"bad": {1, 2, 3}}) is False
 
 
 def test_print_json_returns_true_for_valid_object(uniform_dict_path, capsys):
