@@ -1,6 +1,11 @@
 # exclude the contents of /data and other sensitive stuff
 /data/
 
+# exclude Claude and other 'internal' directories
+CLAUDE.md
+/docs
+/.claude
+
 # stray local venvs (this project's dev env is the shared bb-env conda env)
 /argo/
 
